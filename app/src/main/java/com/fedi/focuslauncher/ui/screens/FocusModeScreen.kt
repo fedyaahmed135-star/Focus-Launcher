@@ -58,7 +58,7 @@ fun FocusModeScreen(navController: NavController) {
                 if (rem <= 0) {
                     remainingSeconds = 0
                     settingsRepo.setFocusModeActive(false)
-                    Toast.makeText(context, "Fokus sessiyası uğurla tamamlandı!", Toast.LENGTH_LONG).show()
+                    Toast.makeText(context, "Focus session completed successfully!", Toast.LENGTH_LONG).show()
                     break
                 } else {
                     remainingSeconds = rem
@@ -92,13 +92,13 @@ fun FocusModeScreen(navController: NavController) {
             IconButton(onClick = { navController.popBackStack() }) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Geri",
+                    contentDescription = "Back",
                     tint = Color.White
                 )
             }
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "Fokus Rejimi",
+                text = "Focus Mode",
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Medium,
                 color = Color.White
@@ -150,7 +150,7 @@ fun FocusModeScreen(navController: NavController) {
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = if (isFocusActive) "Fokus aktivdir" else "Dayandırılıb",
+                    text = if (isFocusActive) "Focus active" else "Paused",
                     fontSize = 13.sp,
                     color = if (isFocusActive) Color(0xFF81C784) else Color.Gray
                 )
@@ -161,7 +161,7 @@ fun FocusModeScreen(navController: NavController) {
 
         // Timer Duration Selectors (15m, 25m Pomodoro, 45m, 60m)
         Text(
-            text = "Müddət seçin",
+            text = "Select duration",
             fontSize = 14.sp,
             color = Color.LightGray,
             fontWeight = FontWeight.Medium,
@@ -189,7 +189,7 @@ fun FocusModeScreen(navController: NavController) {
                         }
                 ) {
                     Text(
-                        text = "${mins}d",
+                        text = "${mins}m",
                         fontSize = 14.sp,
                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                         color = if (isSelected) Color.Black else Color.White,
@@ -235,7 +235,7 @@ fun FocusModeScreen(navController: NavController) {
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = if (isFocusActive) "Fasilə ver" else "Fokusa Başla",
+                    text = if (isFocusActive) "Pause" else "Start Focus",
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 15.sp
                 )
@@ -259,7 +259,7 @@ fun FocusModeScreen(navController: NavController) {
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Sıfırla",
+                    text = "Reset",
                     fontSize = 15.sp
                 )
             }
@@ -275,14 +275,14 @@ fun FocusModeScreen(navController: NavController) {
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text(
-                    text = "Diqqət yayındıranların qarşısını al",
+                    text = "Block distractions",
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Medium,
                     color = Color.White
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Fokus müddətində zənglər və bildirişləri tənzimləyin",
+                    text = "Manage calls and notifications during focus",
                     fontSize = 12.sp,
                     color = Color.Gray
                 )
@@ -309,13 +309,13 @@ fun FocusModeScreen(navController: NavController) {
                         Spacer(modifier = Modifier.width(14.dp))
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Narahat Etməyin rejimini aç",
+                                text = "Open Do Not Disturb settings",
                                 fontSize = 14.sp,
                                 color = Color.White,
                                 fontWeight = FontWeight.Medium
                             )
                             Text(
-                                text = "Sistem səviyyəsində bildirişləri kəs",
+                                text = "Mute system-level notifications",
                                 fontSize = 11.sp,
                                 color = Color.Gray
                             )
@@ -334,7 +334,7 @@ fun FocusModeScreen(navController: NavController) {
 
         // Motivational Minimalist Quote
         Text(
-            text = "“ Sadəlik ən yüksək səviyyəli zəriflikdir. ”",
+            text = "“ Simplicity is the ultimate sophistication. ”",
             fontSize = 13.sp,
             color = Color.DarkGray,
             textAlign = TextAlign.Center
@@ -355,7 +355,7 @@ private fun openDndSettings(context: Context) {
             }
             context.startActivity(fallback)
         } catch (e2: Exception) {
-            Toast.makeText(context, "Səs parametrləri açıla bilmədi", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Could not open sound settings", Toast.LENGTH_SHORT).show()
         }
     }
 }

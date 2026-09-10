@@ -45,71 +45,24 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.fedi.focuslauncher.data.LauncherSettingsRepository
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-
-data class InstalledApp(
-    val name: String,
-    val packageName: String,
-    val activityName: String,
-    val iconBitmap: ImageBitmap? = null
-)
+import com.fedi.focuslauncher.data.AppListRepository
+import com.fedi.focuslauncher.data.InstalledApp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppDrawerScreen(navController: NavController) {
     val context = LocalContext.current
     val settingsRepo = remember { LauncherSettingsRepository.getInstance(context) }
+    val appListRepo = remember { AppListRepository.getInstance(context) }
     val isMonochrome by settingsRepo.monochromeIcons.collectAsStateWithLifecycle()
 
-    var apps by remember { mutableStateOf<List<InstalledApp>>(emptyList()) }
-    var isLoading by remember { mutableStateOf(true) }
+    val apps by appListRepo.installedApps.collectAsStateWithLifecycle()
+    val isLoading by appListRepo.isLoading.collectAsStateWithLifecycle()
     var searchQuery by remember { mutableStateOf("") }
 
     // Launcher Back Navigation: Back button in drawer closes drawer and returns to home screen
     BackHandler(enabled = true) {
         navController.popBackStack()
-    }
-
-    // Load installed apps asynchronously for maximum performance
-    LaunchedEffect(Unit) {
-        withContext(Dispatchers.IO) {
-            val pm = context.packageManager
-            val intent = Intent(Intent.ACTION_MAIN, null).apply {
-                addCategory(Intent.CATEGORY_LAUNCHER)
-            }
-
-            val resolveInfos: List<ResolveInfo> = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                pm.queryIntentActivities(intent, PackageManager.ResolveInfoFlags.of(0L))
-            } else {
-                @Suppress("DEPRECATION")
-                pm.queryIntentActivities(intent, 0)
-            }
-
-            val loadedApps = resolveInfos
-                .mapNotNull { resolveInfo ->
-                    val activityInfo = resolveInfo.activityInfo ?: return@mapNotNull null
-                    val packageName = activityInfo.packageName
-                    val activityName = activityInfo.name
-                    val appName = resolveInfo.loadLabel(pm)?.toString() ?: packageName
-
-                    val drawable = resolveInfo.loadIcon(pm)
-                    val bitmap = drawableToBitmap(drawable)
-
-                    InstalledApp(
-                        name = appName,
-                        packageName = packageName,
-                        activityName = activityName,
-                        iconBitmap = bitmap?.asImageBitmap()
-                    )
-                }
-                .sortedBy { it.name.lowercase() }
-
-            withContext(Dispatchers.Main) {
-                apps = loadedApps
-                isLoading = false
-            }
-        }
     }
 
     val filteredApps = remember(apps, searchQuery) {
@@ -161,7 +114,7 @@ fun AppDrawerScreen(navController: NavController) {
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
-                placeholder = { Text("Tətbiq axtar...", color = Color.Gray, fontSize = 14.sp) },
+                placeholder = { Text("Search apps...", color = Color.Gray, fontSize = 14.sp) },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Filled.Search,
@@ -204,7 +157,7 @@ fun AppDrawerScreen(navController: NavController) {
             ) {
                 Icon(
                     imageVector = Icons.Filled.Settings,
-                    contentDescription = "Launcher Parametrləri",
+                    contentDescription = "Launcher Settings",
                     tint = Color.White,
                     modifier = Modifier.size(22.dp)
                 )
@@ -234,7 +187,7 @@ fun AppDrawerScreen(navController: NavController) {
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = if (searchQuery.isNotBlank()) "Tətbiq tapılmadı" else "Quraşdırılmış tətbiq yoxdur",
+                    text = if (searchQuery.isNotBlank()) "No apps found" else "No installed apps",
                     color = Color.Gray,
                     fontSize = 14.sp
                 )
@@ -335,24 +288,8 @@ private fun launchApp(context: Context, app: InstalledApp) {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(intent)
     } catch (e: Exception) {
-        Toast.makeText(context, "Tətbiq açıla bilmədi", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, "Could not open app", Toast.LENGTH_SHORT).show()
     }
 }
 
-private fun drawableToBitmap(drawable: Drawable): Bitmap? {
-    return try {
-        if (drawable is BitmapDrawable && drawable.bitmap != null) {
-            return drawable.bitmap
-        }
-        val width = if (drawable.intrinsicWidth > 0) drawable.intrinsicWidth else 96
-        val height = if (drawable.intrinsicHeight > 0) drawable.intrinsicHeight else 96
-        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bitmap)
-        drawable.setBounds(0, 0, canvas.width, canvas.height)
-        drawable.draw(canvas)
-        bitmap
-    } catch (e: Exception) {
-        null
-    }
-}
 

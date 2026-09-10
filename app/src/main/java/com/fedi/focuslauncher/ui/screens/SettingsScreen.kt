@@ -61,15 +61,15 @@ fun SettingsScreen(navController: NavController) {
         SettingOption(
             id = "wallpaper",
             icon = Icons.Filled.Wallpaper,
-            title = "Divar Kağızı (Wallpaper)",
-            subtitle = if (isOledBlack) "AMOLED Qara rejim aktivdir" else "Dumanlı dağlar (minimalist) və dinamik mövzular",
+            title = "Wallpaper",
+            subtitle = if (isOledBlack) "AMOLED Black mode is active" else "Misty mountains (minimalist) and dynamic themes",
             onClick = { navController.navigate("wallpaper_settings") }
         ),
         SettingOption(
             id = "monochrome",
             icon = Icons.Filled.Palette,
-            title = "Ağ-qara tətbiq ikonları",
-            subtitle = if (isMonochrome) "Aktivdir (Bütün tətbiqlər monoxromdur)" else "Deaktivdir (Orijinal rənglər)",
+            title = "Monochrome app icons",
+            subtitle = if (isMonochrome) "Active (All apps are monochrome)" else "Inactive (Original colors)",
             isSwitch = true,
             isChecked = isMonochrome,
             onToggle = { settingsRepo.setMonochromeIcons(it) },
@@ -78,8 +78,8 @@ fun SettingsScreen(navController: NavController) {
         SettingOption(
             id = "oled_black",
             icon = Icons.Filled.DarkMode,
-            title = "AMOLED təmiz qara rejim",
-            subtitle = if (isOledBlack) "Təmiz qara fon (Minimalist & Batareyaya qənaət)" else "Minimalist divar kağızı aktivdir",
+            title = "AMOLED pure black mode",
+            subtitle = if (isOledBlack) "Pure black background (Minimalist & Battery saving)" else "Minimalist wallpaper is active",
             isSwitch = true,
             isChecked = isOledBlack,
             onToggle = { settingsRepo.setOledPureBlack(it) },
@@ -88,29 +88,29 @@ fun SettingsScreen(navController: NavController) {
         SettingOption(
             id = "default_launcher",
             icon = Icons.Filled.Home,
-            title = "Varsayılan Launcher kimi təyin et",
-            subtitle = "Focus Launcher-i telefonun əsas ana ekranı et",
+            title = "Set as default launcher",
+            subtitle = "Make Focus Launcher the default home screen",
             onClick = { openHomeSettings(context) }
         ),
         SettingOption(
             id = "focus_mode",
             icon = Icons.Filled.TrackChanges,
-            title = "Fokus rejimi",
-            subtitle = if (isFocusActive) "Fokus rejimi aktivdir • Qaydalar və taymer" else "Pomodoro taymeri və diqqət yayındıranların bloklanması",
+            title = "Focus mode",
+            subtitle = if (isFocusActive) "Focus mode active • Rules and timer" else "Pomodoro timer and distraction blocking",
             onClick = { navController.navigate("focus_mode") }
         ),
         SettingOption(
             id = "notifications",
             icon = Icons.Filled.Notifications,
-            title = "Narahat etməyin və bildirişlər",
-            subtitle = "Sistem bildirişlərini və fokus qaydalarını idarə et",
+            title = "Do Not Disturb and notifications",
+            subtitle = "Manage system notifications and focus rules",
             onClick = { openDndSettings(context) }
         ),
         SettingOption(
             id = "app_management",
             icon = Icons.Filled.Apps,
-            title = "Cihaz tətbiq tənzimləmələri",
-            subtitle = "Quraşdırılmış tətbiqlər və icazələr",
+            title = "Device app settings",
+            subtitle = "Installed apps and permissions",
             onClick = { openAppSettings(context) }
         )
     )
@@ -141,13 +141,13 @@ fun SettingsScreen(navController: NavController) {
             IconButton(onClick = { navController.popBackStack() }) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Geri",
+                    contentDescription = "Back",
                     tint = Color.White
                 )
             }
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "Launcher Parametrləri",
+                text = "Launcher Settings",
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Medium,
                 color = Color.White
@@ -157,12 +157,12 @@ fun SettingsScreen(navController: NavController) {
         OutlinedTextField(
             value = searchQuery,
             onValueChange = { searchQuery = it },
-            placeholder = { Text("Parametrlərdə axtar...", color = Color.Gray, fontSize = 14.sp) },
+            placeholder = { Text("Search settings...", color = Color.Gray, fontSize = 14.sp) },
             leadingIcon = { Icon(Icons.Filled.Search, contentDescription = "Search", tint = Color.Gray) },
             trailingIcon = {
                 if (searchQuery.isNotEmpty()) {
                     IconButton(onClick = { searchQuery = "" }) {
-                        Icon(Icons.Filled.Close, contentDescription = "Təmizlə", tint = Color.Gray)
+                        Icon(Icons.Filled.Close, contentDescription = "Clear", tint = Color.Gray)
                     }
                 }
             },
@@ -244,7 +244,7 @@ private fun SettingsRowItem(option: SettingOption) {
         } else {
             Icon(
                 imageVector = Icons.Filled.ChevronRight,
-                contentDescription = "Aç",
+                contentDescription = "Open",
                 tint = Color.Gray
             )
         }
@@ -264,7 +264,7 @@ private fun openHomeSettings(context: Context) {
             }
             context.startActivity(fallback)
         } catch (e2: Exception) {
-            Toast.makeText(context, "Sistem tənzimləmələri açıla bilmədi", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Could not open system settings", Toast.LENGTH_SHORT).show()
         }
     }
 }
@@ -282,7 +282,7 @@ private fun openDndSettings(context: Context) {
             }
             context.startActivity(fallback)
         } catch (e2: Exception) {
-            Toast.makeText(context, "Səs parametrləri açıla bilmədi", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Could not open sound settings", Toast.LENGTH_SHORT).show()
         }
     }
 }
@@ -294,7 +294,7 @@ private fun openAppSettings(context: Context) {
         }
         context.startActivity(intent)
     } catch (e: Exception) {
-        Toast.makeText(context, "Tətbiq parametrləri açıla bilmədi", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, "Could not open app settings", Toast.LENGTH_SHORT).show()
     }
 }
 

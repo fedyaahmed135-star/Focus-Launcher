@@ -62,7 +62,7 @@ fun WallpaperSelectionScreen(navController: NavController) {
                 )
             } catch (_: Exception) {}
             settingsRepo.setCustomWallpaperUri(uri.toString())
-            Toast.makeText(context, "Şəxsi divar kağızı təyin edildi", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Custom wallpaper set", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -86,20 +86,20 @@ fun WallpaperSelectionScreen(navController: NavController) {
             IconButton(onClick = { navController.popBackStack() }) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Geri",
+                    contentDescription = "Back",
                     tint = Color.White
                 )
             }
             Spacer(modifier = Modifier.width(8.dp))
             Column {
                 Text(
-                    text = "Divar Kağızı (Wallpaper)",
+                    text = "Wallpaper",
                     fontSize = 22.sp,
                     fontWeight = FontWeight.Medium,
                     color = Color.White
                 )
                 Text(
-                    text = "Minimalist dağ teması və dinamik seçimlər",
+                    text = "Minimalist mountain theme and dynamic options",
                     fontSize = 12.sp,
                     color = Color.Gray
                 )
@@ -114,7 +114,7 @@ fun WallpaperSelectionScreen(navController: NavController) {
             // Section: Preset Wallpapers
             item {
                 Text(
-                    text = "Kataloq və Mövzular",
+                    text = "Catalog and Themes",
                     fontSize = 14.sp,
                     color = Color.LightGray,
                     fontWeight = FontWeight.SemiBold,
@@ -129,7 +129,7 @@ fun WallpaperSelectionScreen(navController: NavController) {
                     isSelected = isSelected,
                     onClick = {
                         settingsRepo.setActiveWallpaperId(wallpaper.id)
-                        Toast.makeText(context, "${wallpaper.name} aktiv edildi", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(context, "${wallpaper.name} activated", Toast.LENGTH_SHORT).show()
                     }
                 )
             }
@@ -138,7 +138,7 @@ fun WallpaperSelectionScreen(navController: NavController) {
             item {
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    text = "Qalereyadan Şəxsi Şəkil",
+                    text = "Custom Image from Gallery",
                     fontSize = 14.sp,
                     color = Color.LightGray,
                     fontWeight = FontWeight.SemiBold,
@@ -168,7 +168,7 @@ fun WallpaperSelectionScreen(navController: NavController) {
                             if (customUriString != null) {
                                 AsyncImage(
                                     model = Uri.parse(customUriString),
-                                    contentDescription = "Seçilmiş Şəkil",
+                                    contentDescription = "Selected Image",
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier.fillMaxSize()
                                 )
@@ -176,7 +176,7 @@ fun WallpaperSelectionScreen(navController: NavController) {
                                 Box(contentAlignment = Alignment.Center) {
                                     Icon(
                                         imageVector = Icons.Filled.AddPhotoAlternate,
-                                        contentDescription = "Şəkil seç",
+                                        contentDescription = "Select Image",
                                         tint = Color.White,
                                         modifier = Modifier.size(26.dp)
                                     )
@@ -188,13 +188,13 @@ fun WallpaperSelectionScreen(navController: NavController) {
 
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = if (customUriString != null) "Şəxsi Şəkli Dəyişdir" else "Qalereyadan Divar Kağızı Seç",
+                                text = if (customUriString != null) "Change Custom Image" else "Select Wallpaper from Gallery",
                                 fontSize = 15.sp,
                                 fontWeight = FontWeight.Medium,
                                 color = Color.White
                             )
                             Text(
-                                text = if (customUriString != null) "Cihazın yaddaşından seçilib" else "Öz minimalist şəklinizi əlavə edin",
+                                text = if (customUriString != null) "Selected from device storage" else "Add your own minimalist image",
                                 fontSize = 12.sp,
                                 color = Color.Gray
                             )
@@ -203,7 +203,7 @@ fun WallpaperSelectionScreen(navController: NavController) {
                         if (activeWallpaperId == "custom_photo") {
                             Icon(
                                 imageVector = Icons.Filled.CheckCircle,
-                                contentDescription = "Aktivdir",
+                                contentDescription = "Active",
                                 tint = Color(0xFF81C784),
                                 modifier = Modifier.size(24.dp)
                             )
@@ -216,7 +216,7 @@ fun WallpaperSelectionScreen(navController: NavController) {
             item {
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    text = "Qaranlıq Səviyyəsi (Oxunaqlılıq üçün)",
+                    text = "Dimming Level (for readability)",
                     fontSize = 14.sp,
                     color = Color.LightGray,
                     fontWeight = FontWeight.SemiBold,
@@ -235,7 +235,7 @@ fun WallpaperSelectionScreen(navController: NavController) {
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Text(
-                                text = "Divar kağızı parlaqlığı",
+                                text = "Wallpaper brightness",
                                 fontSize = 14.sp,
                                 color = Color.White
                             )
@@ -357,7 +357,7 @@ private fun WallpaperCardItem(
             if (isSelected) {
                 Icon(
                     imageVector = Icons.Filled.CheckCircle,
-                    contentDescription = "Aktiv",
+                    contentDescription = "Active",
                     tint = Color.White,
                     modifier = Modifier.size(24.dp)
                 )

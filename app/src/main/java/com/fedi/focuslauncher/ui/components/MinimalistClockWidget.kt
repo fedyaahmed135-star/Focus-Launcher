@@ -66,7 +66,7 @@ fun MinimalistClockWidget(
 
     val timeFormat = remember { SimpleDateFormat("HH:mm", Locale.getDefault()) }
     val secondsFormat = remember { SimpleDateFormat("ss", Locale.getDefault()) }
-    val dateFormat = remember { SimpleDateFormat("d MMMM, EEEE", Locale("az", "AZ")) }
+    val dateFormat = remember { SimpleDateFormat("EEEE, MMMM d", Locale.getDefault()) }
 
     val formattedTime = timeFormat.format(currentTime)
     val formattedSeconds = secondsFormat.format(currentTime)
@@ -139,7 +139,7 @@ fun MinimalistClockWidget(
                     ) {
                         Icon(
                             imageVector = if (isCharging) Icons.Filled.BatteryChargingFull else Icons.Filled.BatteryFull,
-                            contentDescription = "Batareya",
+                            contentDescription = "Battery",
                             tint = if (isCharging) Color(0xFF81C784) else Color.LightGray,
                             modifier = Modifier.size(13.dp)
                         )
@@ -195,7 +195,7 @@ private fun openSystemClock(context: Context) {
             }
             context.startActivity(fallbackIntent)
         } catch (e2: Exception) {
-            Toast.makeText(context, "Zəngli saat açıla bilmədi", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Could not open clock", Toast.LENGTH_SHORT).show()
         }
     }
 }
@@ -215,7 +215,7 @@ private fun openSystemCalendar(context: Context) {
             }
             context.startActivity(genericIntent)
         } catch (e2: Exception) {
-            Toast.makeText(context, "Təqvim açıla bilmədi", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Could not open calendar", Toast.LENGTH_SHORT).show()
         }
     }
 }

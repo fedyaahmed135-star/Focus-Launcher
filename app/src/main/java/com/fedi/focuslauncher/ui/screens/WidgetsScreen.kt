@@ -63,14 +63,14 @@ fun WidgetsScreen(navController: NavController) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
                 imageVector = Icons.Filled.DarkMode,
-                contentDescription = "Hava",
+                contentDescription = "Weather",
                 tint = Color.White,
                 modifier = Modifier.size(44.dp)
             )
             Spacer(modifier = Modifier.width(16.dp))
             Column {
                 Text(text = "18°", fontSize = 22.sp, fontWeight = FontWeight.Medium, color = Color.White)
-                Text(text = "Bakı\nAçıq", fontSize = 12.sp, color = Color.LightGray)
+                Text(text = "London\nClear", fontSize = 12.sp, color = Color.LightGray)
             }
         }
 
@@ -83,7 +83,7 @@ fun WidgetsScreen(navController: NavController) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Günün planı",
+                text = "Today's plan",
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Medium,
                 color = Color.White
@@ -94,7 +94,7 @@ fun WidgetsScreen(navController: NavController) {
             ) {
                 Icon(
                     imageVector = Icons.Filled.Add,
-                    contentDescription = "Tapşırıq əlavə et",
+                    contentDescription = "Add task",
                     tint = Color.White,
                     modifier = Modifier.size(20.dp)
                 )
@@ -124,7 +124,7 @@ fun WidgetsScreen(navController: NavController) {
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Plan boşdur. Tapşırıq əlavə etmək üçün toxun.",
+                        text = "Plan is empty. Tap to add a task.",
                         fontSize = 12.sp,
                         color = Color.Gray
                     )
@@ -171,7 +171,7 @@ fun WidgetsScreen(navController: NavController) {
         ) {
             DockIcon(
                 icon = Icons.Filled.Phone,
-                contentDescription = "Zənglər",
+                contentDescription = "Phone",
                 onClick = {
                     try {
                         val intent = android.content.Intent(android.content.Intent.ACTION_DIAL).apply {
@@ -183,7 +183,7 @@ fun WidgetsScreen(navController: NavController) {
             )
             DockIcon(
                 icon = Icons.Filled.ChatBubble,
-                contentDescription = "Mesajlar",
+                contentDescription = "Messages",
                 onClick = {
                     try {
                         val intent = android.content.Intent(android.content.Intent.ACTION_MAIN).apply {
@@ -196,12 +196,12 @@ fun WidgetsScreen(navController: NavController) {
             )
             DockIcon(
                 icon = Icons.Filled.Apps,
-                contentDescription = "Tətbiqlər",
+                contentDescription = "Apps",
                 onClick = { navController.navigate("app_drawer") }
             )
             DockIcon(
                 icon = Icons.Filled.CameraAlt,
-                contentDescription = "Kamera",
+                contentDescription = "Camera",
                 onClick = {
                     try {
                         val intent = android.content.Intent(android.provider.MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA).apply {
@@ -271,7 +271,7 @@ fun DynamicPlanItem(
         ) {
             Icon(
                 imageVector = Icons.Filled.DeleteOutline,
-                contentDescription = "Sil",
+                contentDescription = "Delete",
                 tint = Color.Gray,
                 modifier = Modifier.size(18.dp)
             )
@@ -292,7 +292,7 @@ fun AddTaskDialog(
         containerColor = Color(0xFF1E1E1E),
         title = {
             Text(
-                text = "Yeni tapşırıq",
+                text = "New task",
                 color = Color.White,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Medium
@@ -303,7 +303,7 @@ fun AddTaskDialog(
                 OutlinedTextField(
                     value = title,
                     onValueChange = { title = it },
-                    label = { Text("Tapşırıq", color = Color.Gray) },
+                    label = { Text("Task", color = Color.Gray) },
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedTextColor = Color.White,
@@ -317,7 +317,7 @@ fun AddTaskDialog(
                 OutlinedTextField(
                     value = time,
                     onValueChange = { time = it },
-                    label = { Text("Vaxt (Məs: 10:00 - 11:30)", color = Color.Gray) },
+                    label = { Text("Time (e.g. 10:00 - 11:30)", color = Color.Gray) },
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedTextColor = Color.White,
@@ -338,12 +338,12 @@ fun AddTaskDialog(
                 },
                 enabled = title.isNotBlank()
             ) {
-                Text("Əlavə et", color = if (title.isNotBlank()) Color.White else Color.Gray)
+                Text("Add", color = if (title.isNotBlank()) Color.White else Color.Gray)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Ləğv et", color = Color.Gray)
+                Text("Cancel", color = Color.Gray)
             }
         }
     )

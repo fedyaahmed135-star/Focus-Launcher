@@ -28,7 +28,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import kotlinx.coroutines.isActive
+import android.os.BatteryManager
+import android.content.IntentFilter
+import androidx.compose.material.icons.filled.BatteryChargingFull
+import androidx.compose.material.icons.filled.BatteryFull
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -58,6 +66,35 @@ fun HomeScreen(navController: NavController) {
     val isOledBlack by settingsRepo.oledPureBlack.collectAsStateWithLifecycle()
     val isFocusActive by settingsRepo.focusModeActive.collectAsStateWithLifecycle()
     val focusEndTimeMillis by settingsRepo.focusEndTimeMillis.collectAsStateWithLifecycle()
+
+    var batteryPercentage by remember { mutableIntStateOf(-1) }
+    var isCharging by remember { mutableStateOf(false) }
+
+    // Battery polling
+    LaunchedEffect(Unit) {
+        var tickCounter = 0
+        while (isActive) {
+            if (tickCounter % 30 == 0) {
+                try {
+                    val batteryIntent = context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+                    val level = batteryIntent?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: -1
+                    val scale = batteryIntent?.getIntExtra(BatteryManager.EXTRA_SCALE, -1) ?: -1
+                    if (level >= 0 && scale > 0) {
+                        batteryPercentage = (level * 100) / scale
+                    } else {
+                        batteryPercentage = -1
+                    }
+                    val status = batteryIntent?.getIntExtra(BatteryManager.EXTRA_STATUS, -1) ?: -1
+                    isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING || status == BatteryManager.BATTERY_STATUS_FULL
+                } catch (e: Exception) {
+                    batteryPercentage = -1
+                    isCharging = false
+                }
+            }
+            tickCounter++
+            kotlinx.coroutines.delay(1000L)
+        }
+    }
 
     // Auto-disable focus mode if time has expired
     LaunchedEffect(isFocusActive, focusEndTimeMillis) {
@@ -108,33 +145,62 @@ fun HomeScreen(navController: NavController) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if (isFocusActive) {
-                    Surface(
-                        shape = RoundedCornerShape(16.dp),
-                        color = Color(0xFF1E2A1E),
-                        modifier = Modifier.clickable { navController.navigate("focus_mode") }
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (isFocusActive) {
+                        Surface(
+                            shape = RoundedCornerShape(16.dp),
+                            color = Color(0xFF1E2A1E),
+                            modifier = Modifier.clickable { navController.navigate("focus_mode") }
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(8.dp)
-                                    .clip(CircleShape)
-                                    .background(Color(0xFF4CAF50))
-                            )
-                            Spacer(modifier = Modifier.width(6.dp))
-                            Text(
-                                text = "Fokus aktiv",
-                                fontSize = 12.sp,
-                                color = Color(0xFF81C784),
-                                fontWeight = FontWeight.Medium
-                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(8.dp)
+                                        .clip(CircleShape)
+                                        .background(Color(0xFF4CAF50))
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = "Focus active",
+                                    fontSize = 12.sp,
+                                    color = Color(0xFF81C784),
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
                         }
+                        
+                        if (batteryPercentage >= 0) {
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Surface(
+                                shape = RoundedCornerShape(16.dp),
+                                color = Color(0xFF1A1A1A).copy(alpha = 0.7f)
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = if (isCharging) Icons.Filled.BatteryChargingFull else Icons.Filled.BatteryFull,
+                                        contentDescription = "Battery",
+                                        tint = if (isCharging) Color(0xFF81C784) else Color.LightGray,
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(4.dp))
+                                    Text(
+                                        text = "$batteryPercentage%",
+                                        fontSize = 12.sp,
+                                        color = Color.LightGray,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
+                            }
+                        }
+                    } else {
+                        Spacer(modifier = Modifier.width(1.dp))
                     }
-                } else {
-                    Spacer(modifier = Modifier.width(1.dp))
                 }
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -144,7 +210,7 @@ fun HomeScreen(navController: NavController) {
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Wallpaper,
-                            contentDescription = "Divar Kağızı",
+                            contentDescription = "Wallpaper",
                             tint = Color.LightGray.copy(alpha = 0.7f),
                             modifier = Modifier.size(20.dp)
                         )
@@ -156,7 +222,7 @@ fun HomeScreen(navController: NavController) {
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Settings,
-                            contentDescription = "Parametrlər",
+                            contentDescription = "Settings",
                             tint = Color.LightGray.copy(alpha = 0.7f),
                             modifier = Modifier.size(20.dp)
                         )
@@ -183,12 +249,12 @@ fun HomeScreen(navController: NavController) {
             ) {
                 Icon(
                     imageVector = Icons.Filled.KeyboardArrowUp,
-                    contentDescription = "Tətbiqləri aç",
+                    contentDescription = "Open Apps",
                     tint = Color.LightGray.copy(alpha = 0.5f),
                     modifier = Modifier.size(20.dp)
                 )
                 Text(
-                    text = "Yuxarı çək",
+                    text = "Swipe up",
                     fontSize = 11.sp,
                     color = Color.LightGray.copy(alpha = 0.5f)
                 )
@@ -204,22 +270,22 @@ fun HomeScreen(navController: NavController) {
             ) {
                 DockIcon(
                     icon = Icons.Filled.Phone,
-                    contentDescription = "Zənglər",
+                    contentDescription = "Phone",
                     onClick = { openDialer(context) }
                 )
                 DockIcon(
                     icon = Icons.Filled.ChatBubble,
-                    contentDescription = "Mesajlar",
+                    contentDescription = "Messages",
                     onClick = { openMessages(context) }
                 )
                 DockIcon(
                     icon = Icons.Filled.Apps,
-                    contentDescription = "Tətbiqlər",
+                    contentDescription = "Apps",
                     onClick = { navController.navigate("app_drawer") }
                 )
                 DockIcon(
                     icon = Icons.Filled.CameraAlt,
-                    contentDescription = "Kamera",
+                    contentDescription = "Camera",
                     onClick = { openCamera(context) }
                 )
             }
@@ -252,7 +318,7 @@ private fun openDialer(context: Context) {
         }
         context.startActivity(intent)
     } catch (e: Exception) {
-        Toast.makeText(context, "Zəng tətbiqi tapılmadı", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, "Phone app not found", Toast.LENGTH_SHORT).show()
     }
 }
 
@@ -271,7 +337,7 @@ private fun openMessages(context: Context) {
             }
             context.startActivity(fallback)
         } catch (e2: Exception) {
-            Toast.makeText(context, "Mesaj tətbiqi tapılmadı", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Messages app not found", Toast.LENGTH_SHORT).show()
         }
     }
 }
@@ -283,7 +349,7 @@ private fun openCamera(context: Context) {
         }
         context.startActivity(intent)
     } catch (e: Exception) {
-        Toast.makeText(context, "Kamera tətbiqi tapılmadı", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, "Camera app not found", Toast.LENGTH_SHORT).show()
     }
 }
 
