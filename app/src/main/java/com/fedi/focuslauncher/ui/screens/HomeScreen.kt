@@ -26,6 +26,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -56,6 +57,20 @@ fun HomeScreen(navController: NavController) {
 
     val isOledBlack by settingsRepo.oledPureBlack.collectAsStateWithLifecycle()
     val isFocusActive by settingsRepo.focusModeActive.collectAsStateWithLifecycle()
+    val focusEndTimeMillis by settingsRepo.focusEndTimeMillis.collectAsStateWithLifecycle()
+
+    // Auto-disable focus mode if time has expired
+    LaunchedEffect(isFocusActive, focusEndTimeMillis) {
+        if (isFocusActive) {
+            while (true) {
+                if (System.currentTimeMillis() >= focusEndTimeMillis) {
+                    settingsRepo.setFocusModeActive(false)
+                    break
+                }
+                kotlinx.coroutines.delay(1000L)
+            }
+        }
+    }
 
     // Real Android Launcher: Back button on Home screen never exits the launcher
     BackHandler(enabled = true) {

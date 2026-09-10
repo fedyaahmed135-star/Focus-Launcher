@@ -32,6 +32,9 @@ class LauncherSettingsRepository private constructor(context: Context) {
     private val _focusModeActive = MutableStateFlow(prefs.getBoolean(KEY_FOCUS_ACTIVE, false))
     val focusModeActive: StateFlow<Boolean> = _focusModeActive.asStateFlow()
 
+    private val _focusEndTimeMillis = MutableStateFlow(prefs.getLong(KEY_FOCUS_END_TIME, 0L))
+    val focusEndTimeMillis: StateFlow<Long> = _focusEndTimeMillis.asStateFlow()
+
     private val _focusDurationMinutes = MutableStateFlow(prefs.getInt(KEY_FOCUS_MINUTES, 25))
     val focusDurationMinutes: StateFlow<Int> = _focusDurationMinutes.asStateFlow()
 
@@ -81,6 +84,11 @@ class LauncherSettingsRepository private constructor(context: Context) {
         _focusModeActive.value = active
     }
 
+    fun setFocusEndTimeMillis(timeInMillis: Long) {
+        prefs.edit().putLong(KEY_FOCUS_END_TIME, timeInMillis).apply()
+        _focusEndTimeMillis.value = timeInMillis
+    }
+
     fun setFocusDurationMinutes(minutes: Int) {
         prefs.edit().putInt(KEY_FOCUS_MINUTES, minutes).apply()
         _focusDurationMinutes.value = minutes
@@ -93,6 +101,7 @@ class LauncherSettingsRepository private constructor(context: Context) {
         private const val KEY_CUSTOM_WALLPAPER_URI = "custom_wallpaper_uri"
         private const val KEY_WALLPAPER_DIM = "wallpaper_dim"
         private const val KEY_FOCUS_ACTIVE = "focus_mode_active"
+        private const val KEY_FOCUS_END_TIME = "focus_end_time_millis"
         private const val KEY_FOCUS_MINUTES = "focus_duration_minutes"
 
         @Volatile

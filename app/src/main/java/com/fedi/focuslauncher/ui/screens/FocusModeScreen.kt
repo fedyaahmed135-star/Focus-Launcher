@@ -38,32 +38,33 @@ fun FocusModeScreen(navController: NavController) {
     val context = LocalContext.current
     val settingsRepo = remember { LauncherSettingsRepository.getInstance(context) }
     val isFocusActive by settingsRepo.focusModeActive.collectAsStateWithLifecycle()
+    val focusEndTime by settingsRepo.focusEndTimeMillis.collectAsStateWithLifecycle()
     val savedMinutes by settingsRepo.focusDurationMinutes.collectAsStateWithLifecycle()
 
     var selectedDuration by remember(savedMinutes) { mutableIntStateOf(savedMinutes) }
-    var remainingSeconds by remember(selectedDuration) { mutableIntStateOf(selectedDuration * 60) }
-    var isTimerRunning by remember { mutableStateOf(isFocusActive) }
+    var remainingSeconds by remember { mutableIntStateOf(if (isFocusActive) ((focusEndTime - System.currentTimeMillis()) / 1000L).toInt().coerceAtLeast(0) else savedMinutes * 60) }
 
     // Android Launcher navigation: Back returns to Home screen
     BackHandler(enabled = true) {
         navController.popBackStack()
     }
 
-    // Active Countdown Timer Engine
-    LaunchedEffect(isTimerRunning) {
-        if (isTimerRunning) {
-            settingsRepo.setFocusModeActive(true)
-            while (remainingSeconds > 0 && isTimerRunning) {
-                delay(1000L)
-                remainingSeconds--
+    // Active Countdown Timer Engine (Global Sync)
+    LaunchedEffect(isFocusActive, focusEndTime) {
+        if (isFocusActive) {
+            while (true) {
+                val now = System.currentTimeMillis()
+                val rem = ((focusEndTime - now) / 1000L).toInt()
+                if (rem <= 0) {
+                    remainingSeconds = 0
+                    settingsRepo.setFocusModeActive(false)
+                    Toast.makeText(context, "Fokus sessiyası uğurla tamamlandı!", Toast.LENGTH_LONG).show()
+                    break
+                } else {
+                    remainingSeconds = rem
+                }
+                kotlinx.coroutines.delay(1000L)
             }
-            if (remainingSeconds == 0) {
-                isTimerRunning = false
-                settingsRepo.setFocusModeActive(false)
-                Toast.makeText(context, "Fokus sessiyası uğurla tamamlandı!", Toast.LENGTH_LONG).show()
-            }
-        } else {
-            settingsRepo.setFocusModeActive(false)
         }
     }
 
@@ -106,11 +107,14 @@ fun FocusModeScreen(navController: NavController) {
 
             // Master Switch
             Switch(
-                checked = isTimerRunning,
+                checked = isFocusActive,
                 onCheckedChange = { active ->
-                    isTimerRunning = active
-                    if (active && remainingSeconds == 0) {
-                        remainingSeconds = selectedDuration * 60
+                    if (active) {
+                        if (remainingSeconds == 0) remainingSeconds = selectedDuration * 60
+                        settingsRepo.setFocusEndTimeMillis(System.currentTimeMillis() + remainingSeconds * 1000L)
+                        settingsRepo.setFocusModeActive(true)
+                    } else {
+                        settingsRepo.setFocusModeActive(false)
                     }
                 },
                 colors = SwitchDefaults.colors(
@@ -131,7 +135,7 @@ fun FocusModeScreen(navController: NavController) {
                 .clip(CircleShape)
                 .border(
                     width = 2.dp,
-                    color = if (isTimerRunning) Color.White else Color.DarkGray,
+                    color = if (isFocusActive) Color.White else Color.DarkGray,
                     shape = CircleShape
                 ),
             contentAlignment = Alignment.Center
@@ -146,9 +150,9 @@ fun FocusModeScreen(navController: NavController) {
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = if (isTimerRunning) "Fokus aktivdir" else "Dayandırılıb",
+                    text = if (isFocusActive) "Fokus aktivdir" else "Dayandırılıb",
                     fontSize = 13.sp,
-                    color = if (isTimerRunning) Color(0xFF81C784) else Color.Gray
+                    color = if (isFocusActive) Color(0xFF81C784) else Color.Gray
                 )
             }
         }
@@ -179,7 +183,7 @@ fun FocusModeScreen(navController: NavController) {
                         .clickable {
                             selectedDuration = mins
                             settingsRepo.setFocusDurationMinutes(mins)
-                            if (!isTimerRunning) {
+                            if (!isFocusActive) {
                                 remainingSeconds = mins * 60
                             }
                         }
@@ -205,28 +209,33 @@ fun FocusModeScreen(navController: NavController) {
         ) {
             Button(
                 onClick = {
-                    if (remainingSeconds == 0) {
-                        remainingSeconds = selectedDuration * 60
+                    if (isFocusActive) {
+                        settingsRepo.setFocusModeActive(false)
+                    } else {
+                        if (remainingSeconds == 0) {
+                            remainingSeconds = selectedDuration * 60
+                        }
+                        settingsRepo.setFocusEndTimeMillis(System.currentTimeMillis() + remainingSeconds * 1000L)
+                        settingsRepo.setFocusModeActive(true)
                     }
-                    isTimerRunning = !isTimerRunning
                 },
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = if (isTimerRunning) Color(0xFF2C2C2E) else Color.White,
-                    contentColor = if (isTimerRunning) Color.White else Color.Black
+                    containerColor = if (isFocusActive) Color(0xFF2C2C2E) else Color.White,
+                    contentColor = if (isFocusActive) Color.White else Color.Black
                 ),
                 modifier = Modifier
                     .weight(1f)
                     .height(52.dp)
             ) {
                 Icon(
-                    imageVector = if (isTimerRunning) Icons.Filled.Pause else Icons.Filled.PlayArrow,
+                    imageVector = if (isFocusActive) Icons.Filled.Pause else Icons.Filled.PlayArrow,
                     contentDescription = null,
                     modifier = Modifier.size(20.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = if (isTimerRunning) "Fasilə ver" else "Fokusa Başla",
+                    text = if (isFocusActive) "Fasilə ver" else "Fokusa Başla",
                     fontWeight = FontWeight.SemiBold,
                     fontSize = 15.sp
                 )
@@ -234,9 +243,8 @@ fun FocusModeScreen(navController: NavController) {
 
             OutlinedButton(
                 onClick = {
-                    isTimerRunning = false
-                    remainingSeconds = selectedDuration * 60
                     settingsRepo.setFocusModeActive(false)
+                    remainingSeconds = selectedDuration * 60
                 },
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
